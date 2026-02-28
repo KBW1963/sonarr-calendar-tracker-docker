@@ -1,5 +1,3 @@
-# version: '3.8'
-
 services:
   sonarr-calendar:
     build: .
@@ -31,4 +29,5 @@ services:
 
 networks:
   sonarr-network:
+
     driver: bridge
