@@ -3,7 +3,6 @@
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Sonarr](https://img.shields.io/badge/Sonarr-v3%2Fv4-orange)
 
-To hopefully assit those that may find this useful and may find the python version and its installation a bit daunting. Here is a docker version. 
 
 A beautiful, feature‑rich HTML dashboard for your Sonarr shows.  
 Track upcoming episodes over a specified date range, monitor overall progress, and see which seasons have been completed – all in a sleek, customisable interface.
@@ -14,11 +13,13 @@ Track upcoming episodes over a specified date range, monitor overall progress, a
 **NOTE: I am not a SW developer or a coder by trade. I have a little knowledge to be dangerous and have used some skills from my past working life and my hobbyist approach to build this project. 
 And YES! a lot of research was needed to help me understand and develop the code, along with some AI suggestions, which to be fair is hard to not do with search engines today.
 
+To hopefully assit those that may find this useful and do not want to use the python version [sonarr calendar tracker](https://github.com/KBW1963/Sonarr-Calendar-Tracker). Here is a docker version. 
+
 The tracker has been designed to run locally on your own hardware and network. It hasn't been designed to be exposed to the outside world. 
 
-I am happy with it for my needs and will NOT be constantly developing it, sorry 😞. 
-
 I am releasing it to the community AS IS and provide no support or warranty. Use at your own risk.  ALWAYS backup before installing.
+
+I am happy with it for my needs and will NOT be constantly developing it, sorry 😞. 
 
 So, please be understanding! ☺️.
 ---
@@ -34,7 +35,57 @@ So, please be understanding! ☺️.
 - 🌍 **OS‑aware date formatting** – Dates automatically adapt to your system’s locale (e.g. `DD/MM/YYYY` or `MM/DD/YYYY`).
 - 🔗 **Direct links to Sonarr** – Click any show card to open its page in Sonarr.
 ---
+## Environment Variables Reference
 
+The python version [sonarr calendar tracker](https://github.com/KBW1963/Sonarr-Calendar-Tracker) referenced a config file, this is now handled exclusively via environment variables in the `docker-compose.yml`. 
 
+Below is a complete list of supported variables, their requirements, descriptions, default values (if any), and examples.
 
+| Variable | Required | Description | Default | Example |
+|----------|----------|-------------|---------|---------|
+| `SONARR_URL` | **Yes** | Full URL of your Sonarr instance, including protocol and port. | – | `http://192.168.1.100:8989` |
+| `SONARR_API_KEY` | **Yes** | API key from Sonarr (Settings → General). | – | `your sonarr API key` |
+| `DAYS_PAST` | **Yes** | Number of days before today to include in the calendar. | – | `7` |
+| `DAYS_FUTURE` | **Yes** | Number of days after today to include. | – | `30` |
+| `OUTPUT_HTML_FILE` | **Yes** | Full path inside the container where the HTML dashboard will be saved. Must be within a mounted volume to persist. | – | `/output/UpcomingTV.html` |
+| `IMAGE_CACHE_DIR` | No | Directory where images (fanart, posters) are cached. If not set, images are stored inside the container (ephemeral). | `sonarr_images` (inside container) | `/cache` |
+| `OUTPUT_JSON_FILE` | No | If set, a JSON file with metadata will be written to this path (inside a mounted volume). | (none) | `/output/data.json` |
+| `REFRESH_INTERVAL_HOURS` | No | Hours between automatic refreshes when running in daemon mode. | `6` | `12` |
+| `HTML_THEME` | No | Colour theme of the dashboard: `dark` or `light`. | `dark` | `light` |
+| `GRID_COLUMNS` | No | Number of show cards per row in the grid layout. | `4` | `3` |
+| `IMAGE_QUALITY` | No | Preferred image type. The actual selection priority is hard‑coded as: **fanart → poster → banner → any**. This variable is currently a hint; future versions may respect it more strictly. | `fanart` | `poster` |
+| `ENABLE_IMAGE_CACHE` | No | Whether to cache images locally. | `true` | `false` |
+| `HTML_TITLE` | No | Browser tab title for the generated HTML page. | `Sonarr Calendar Pro` | `My Sonarr Dashboard` |
+| `TZ` | No | Container timezone (used for log timestamps and date calculations). | `UTC` | `America/New_York` |
+
+---
+
+### ⚠️ Important Notes
+
+- **Required variables** must be provided; if any are missing, the application will exit with an error listing the missing ones.
+- **Path variables** (`OUTPUT_HTML_FILE`, `OUTPUT_JSON_FILE`, `IMAGE_CACHE_DIR`) should point to locations inside **mounted volumes** to ensure data persists across container restarts.
+- The container runs as a non‑root user with a fixed UID (usually `100`). When using host‑mounted directories, ensure they are owned by that UID (or set permissions accordingly). 
+- Setting `TZ` to your local timezone ensures that logs and date calculations reflect your local time.
+
+---
+
+### 🐳 Setting Environment Variables in Docker
+
+#### With `docker run`:
+```bash
+docker run -e SONARR_URL="http://192.168.1.100:8989" \
+           -e SONARR_API_KEY="your_key" \
+           -e DAYS_PAST=7 \
+           -e DAYS_FUTURE=30 \
+           -e OUTPUT_HTML_FILE="/output/UpcomingTV.html" \
+           -e IMAGE_CACHE_DIR="/cache" \
+           -v /host/output:/output \
+           -v /host/cache:/cache \
+           your-image:latest
+```
+---
+### ⛃ Volume Mounts and Storage
+The volumes mount host directories to these container paths.
+- Output directory – must be writable by the container user. The HTML file (and optionally JSON) will be written here.
+- Cache directory – must be writable by the container user. Images will be stored here in subdirectories named after series IDs (e.g., 123_fanart.jpg). If you set IMAGE_CACHE_DIR to a path inside the output directory (e.g., /output/sonarr_images), then the images will appear alongside the HTML file, making them accessible via the same web server.
 
