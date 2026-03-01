@@ -72,7 +72,50 @@ The volumes mount host directories to these container paths.
 ---
 
 ## 🔡 Environment Variables Reference
-The python version [sonarr calendar tracker](https://github.com/KBW1963/Sonarr-Calendar-Tracker) referenced a config file, this is now handled exclusively via environment variables in the `docker-compose.yml`. 
+The 🐍 python version [sonarr calendar tracker](https://github.com/KBW1963/Sonarr-Calendar-Tracker) referenced a config file, which you created via the config apps. This is now handled exclusively via environment variables in the `docker-compose.yml`. 
+
+## Example - `docker-compose.yml`
+```yaml
+services:
+  sonarr-calendar:
+    image: tomita2022/sonarr-calendar:latest
+    container_name: sonarr-calendar
+    restart: unless-stopped
+    environment:
+      # Required
+      - SONARR_URL=http://192.168.0.100:8989        # URL to your Sonarr instance (use the service name 'sonarr' if it's in the same Docker network)
+      - SONARR_API_KEY=your_super_secret_key        # API key from Sonarr (Settings > General > Security)
+      - DAYS_PAST=7
+      - DAYS_FUTURE=30
+      - OUTPUT_HTML_FILE=/output/TV.html             # output HTML file path (must be in a mounted volume)
+# Optional (with defaults shown)
+# - OUTPUT_JSON_FILE=/output/sonarr_data.json        # optional – remove if not wanted
+      - IMAGE_CACHE_DIR=/cache                       # default: sonarr_images
+      - REFRESH_INTERVAL_HOURS=6                     # default: 6
+      - HTML_THEME=dark                              # default: dark
+      - GRID_COLUMNS=4                               # default: 4
+      - IMAGE_QUALITY=fanart                         # default: fanart
+      - ENABLE_IMAGE_CACHE=true                      # default: true
+      - HTML_TITLE="My Sonarr Dashboard"             # default: Sonarr Calendar Pro
+      - TZ=Europe/London                             # for correct log timestamps
+    volumes:
+      # Mount a directory for the generated HTML and JSON
+      #- /mnt/truenas/app_configs/sonarr-calendar/output:/output  # Example
+       ./output:/output
+      
+      # Mount a directory for cached images
+      #- /mnt/truenas/app_configs/sonarr-calendar/cache:/cache    # Example
+      - ./cache:/cache
+
+
+networks:
+      - sonarr-network
+
+networks:
+  sonarr-network:
+    driver: bridge
+```
+---
 
 Below is a complete list of supported variables, their requirements, descriptions, default values (if any), and examples.
 
@@ -137,6 +180,7 @@ nginx:
     - sonarr-calendar
 ```
 Then access `http://your-host-ip:8080/UpcomingTV.html`.
+
 
 
 
