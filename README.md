@@ -27,7 +27,7 @@ assume you have basic familiarity with your container management tool.
 
 I have tested the deployment via my own TrueNAS env which already has my ARR stack up and running. I deployed the Sonarr Calendar Tracker as a custom app via YAML with the HTML saved to a webdav location, this in turn is referenced by my homelab dashboard, currently [homepage](https://gethomepage.dev).
 
-## ✨ Features
+## ✨ Dashboard Features
 
 - 📅 **Customisable date range** – Choose how many days past and future to display (configurable).
 - 🖼️ **Image caching** – Show posters or fanart are downloaded and stored locally for faster loading. **Fanart is now the default priority**, with fallback to poster and banner. 
@@ -115,6 +115,27 @@ docker run -e SONARR_URL="http://192.168.1.100:8989" \
            your-image:latest
 ```
 ---
+
+## 🌐 Accessing the Dashboard
+### </> If You Use WebDAV on TrueNAS
+If your output directory is on a WebDAV share (e.g., `/mnt/truenas/media/sonarr730`), you can access the HTML file via your WebDAV client or by mounting the share in your OS. However, the images must be placed so 
+that the relative path `sonarr_images/...` resolves correctly. The easiest way is to set `IMAGE_CACHE_DIR=/output/sonarr_images`. Then both HTML and images live under the same WebDAV root.
+
+### Of you could use nginx (Optional)
+To view the dashboard in a browser, you can add an nginx container that serves the output directory. Example `docker-compose` addition:
+
+```
+nginx:
+  image: nginx:alpine
+  ports:
+    - "8080:80"
+  volumes:
+    - ./output:/usr/share/nginx/html:ro
+  depends_on:
+    - sonarr-calendar
+```
+Then access `http://your-host-ip:8080/UpcomingTV.html`.
+
 
 
 
