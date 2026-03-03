@@ -135,11 +135,11 @@ def get_episode_badge(episode, season_episode_counts: Dict[int, int] = None) -> 
                 'color': '#00FF00',
                 'icon': 'fa-star'
             },
-            'seasonFinale': {
-                'type': 'season-finale',
-                'text': 'Season Finale',
-                'color': '#FFA500',
-                'icon': 'fa-flag'
+            'seriesPremiere': {
+                'type': 'series-premiere',
+                'text': 'Series Premiere',
+                'color': '#FFD700',  # gold
+                'icon': 'fa-star'
             },
             'midSeasonPremiere': {
                 'type': 'midseason-premiere',
@@ -147,24 +147,31 @@ def get_episode_badge(episode, season_episode_counts: Dict[int, int] = None) -> 
                 'color': '#00CED1',  # turquoise
                 'icon': 'fa-star-half-alt'
             },
+            'seasonFinale': {
+                'type': 'season-finale',
+                'text': 'Season Finale',
+                'color': '#FFA500',  # orange
+                'icon': 'fa-flag'
+            },
             'midSeasonFinale': {
                 'type': 'midseason-finale',
                 'text': 'Mid‑Season Finale',
                 'color': '#FF8C00',  # dark orange
                 'icon': 'fa-flag-checkered'
             },
-            'seriesPremiere': {
-                'type': 'premiere',
-                'text': 'Series Premiere',
-                'color': '#00FF00',
-                'icon': 'fa-star'
-            },
             'seriesFinale': {
                 'type': 'series-finale',
                 'text': 'Series Finale',
-                'color': '#FF0000',
+                'color': '#FF0000',  # red
                 'icon': 'fa-flag-checkered'
             },
+            'special': {
+                'type': 'special',
+                'text': 'Special',
+                'color': '#9C27B0',  # purple
+                'icon': 'fa-gem'
+            },
+            # 'standard' episodes intentionally omitted – no badge
         }
         if ep_type in type_map:
             return type_map[ep_type]
