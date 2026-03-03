@@ -278,7 +278,7 @@
         }
         .completed-seasons-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); /* increased from 300px to 350px */
             gap: 20px;
         }
         .show-card-wrapper {
@@ -326,7 +326,8 @@
         .completed-season-img {
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: contain; /* changed from cover to contain */
+            background: var(--card-bg); /* fallback background */
         }
         .poster-placeholder-small {
             width: 100%;
