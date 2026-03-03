@@ -37,9 +37,8 @@
             --series-finale-color: #FF0000;
             --midseason-premiere-color: #00CED1;
             --midseason-finale-color: #FF8C00;
-            /* New badge colors */
-            --series-premiere-color: #FFD700;  /* gold */
-            --special-color: #9C27B0;          /* purple */
+            --series-premiere-color: #FFD700;
+            --special-color: #9C27B0;
         }
 
         /* Light theme */
@@ -729,6 +728,11 @@
         .episode-item.status-missing {
             border-left-color: var(--progress-not-started);
         }
+        /* Special episodes override – purple left border */
+        .episode-item.episode-special {
+            border-left-color: var(--special-color) !important;
+            box-shadow: 0 0 5px var(--special-color);
+        }
         .episode-badge {
             display: inline-flex;
             align-items: center;
@@ -738,6 +742,7 @@
             font-size: 0.7em;
             font-weight: 600;
             margin-left: 6px;
+            margin-right: 6px;
             vertical-align: middle;
             white-space: nowrap;
         }
@@ -769,7 +774,6 @@
             color: var(--midseason-finale-color);
             border: 1px solid var(--midseason-finale-color)40;
         }
-        /* New badges */
         .episode-badge.series-premiere {
             background: var(--series-premiere-color)20;
             color: var(--series-premiere-color);
@@ -804,16 +808,22 @@
             justify-content: space-between;
             margin-bottom: 4px;
             font-size: 0.85em;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 4px;
         }
         .episode-number {
             font-weight: bold;
             color: var(--primary-color);
+            white-space: nowrap;
         }
         .episode-date {
             color: var(--text-secondary);
+            white-space: nowrap;
         }
         .episode-days {
             font-weight: 600;
+            white-space: nowrap;
         }
         .days-today {
             color: var(--progress-complete);
@@ -1276,36 +1286,38 @@
                                         {% for ep in show.episodes_in_range[:DISPLAY_EPISODES_LIMIT] %}
                                             {% set status_class = 'status-downloaded' if ep.has_file else ('status-monitored' if ep.monitored else 'status-missing') %}
                                             {% set badge = get_episode_badge(ep, show.season_episode_counts) %}
+                                            {# Add extra class for special episodes #}
+                                            {% set extra_class = 'episode-special' if badge and badge.type == 'special' else '' %}
                                             {% if ep.single_episode %}
-                                            <div class="episode-item {{ status_class }} preview-episode" title="{{ ep.full_title }}">
+                                            <div class="episode-item {{ status_class }} {{ extra_class }} preview-episode" title="{{ ep.full_title }}">
                                                 <div class="episode-header">
                                                     <span class="episode-number">{{ ep.formatted_season_episode }}</span>
+                                                    {% if badge %}
+                                                    <span class="episode-badge {{ badge.type }}" style="background: {{ badge.color }}20; color: {{ badge.color }}; border: 1px solid {{ badge.color }}40;" title="{{ badge.text }}">
+                                                        <i class="fas {{ badge.icon }}"></i> {{ badge.text }}
+                                                    </span>
+                                                    {% endif %}
                                                     <span class="episode-date">{{ ep.air_date|format_date }}</span>
                                                     <span class="episode-days {{ get_days_class(ep.days_until) }}">{{ get_days_text(ep.days_until) }}</span>
                                                 </div>
                                                 <div class="episode-title">
                                                     {{ ep.title|truncate(25) }}
+                                                </div>
+                                            </div>
+                                            {% else %}
+                                            <div class="episode-item {{ status_class }} {{ extra_class }} episode-multiple preview-episode" title="{{ ep.full_tooltip }}">
+                                                <div class="episode-header">
+                                                    <span class="episode-number">{{ ep.formatted_season_episode }}</span>
                                                     {% if badge %}
                                                     <span class="episode-badge {{ badge.type }}" style="background: {{ badge.color }}20; color: {{ badge.color }}; border: 1px solid {{ badge.color }}40;" title="{{ badge.text }}">
                                                         <i class="fas {{ badge.icon }}"></i> {{ badge.text }}
                                                     </span>
                                                     {% endif %}
-                                                </div>
-                                            </div>
-                                            {% else %}
-                                            <div class="episode-item {{ status_class }} episode-multiple preview-episode" title="{{ ep.full_tooltip }}">
-                                                <div class="episode-header">
-                                                    <span class="episode-number">{{ ep.formatted_season_episode }}</span>
                                                     <span class="episode-date">{{ ep.air_date|format_date }}</span>
                                                     <span class="episode-days {{ get_days_class(ep.days_until) }}">{{ get_days_text(ep.days_until) }}</span>
                                                 </div>
                                                 <div class="episode-titles">
                                                     {{ ep.titles_display }} ({{ ep.individual_episode_count }} eps)
-                                                    {% if badge %}
-                                                    <span class="episode-badge {{ badge.type }}" style="background: {{ badge.color }}20; color: {{ badge.color }}; border: 1px solid {{ badge.color }}40;" title="{{ badge.text }}">
-                                                        <i class="fas {{ badge.icon }}"></i> {{ badge.text }}
-                                                    </span>
-                                                    {% endif %}
                                                 </div>
                                             </div>
                                             {% endif %}
@@ -1322,36 +1334,37 @@
                                             {% for ep in show.episodes_in_range[DISPLAY_EPISODES_LIMIT:] %}
                                                 {% set status_class = 'status-downloaded' if ep.has_file else ('status-monitored' if ep.monitored else 'status-missing') %}
                                                 {% set badge = get_episode_badge(ep, show.season_episode_counts) %}
+                                                {% set extra_class = 'episode-special' if badge and badge.type == 'special' else '' %}
                                                 {% if ep.single_episode %}
-                                                <div class="episode-item {{ status_class }}" title="{{ ep.full_title }}">
+                                                <div class="episode-item {{ status_class }} {{ extra_class }}" title="{{ ep.full_title }}">
                                                     <div class="episode-header">
                                                         <span class="episode-number">{{ ep.formatted_season_episode }}</span>
+                                                        {% if badge %}
+                                                        <span class="episode-badge {{ badge.type }}" style="background: {{ badge.color }}20; color: {{ badge.color }}; border: 1px solid {{ badge.color }}40;" title="{{ badge.text }}">
+                                                            <i class="fas {{ badge.icon }}"></i> {{ badge.text }}
+                                                        </span>
+                                                        {% endif %}
                                                         <span class="episode-date">{{ ep.air_date|format_date }}</span>
                                                         <span class="episode-days {{ get_days_class(ep.days_until) }}">{{ get_days_text(ep.days_until) }}</span>
                                                     </div>
                                                     <div class="episode-title">
                                                         {{ ep.title|truncate(25) }}
+                                                    </div>
+                                                </div>
+                                                {% else %}
+                                                <div class="episode-item {{ status_class }} {{ extra_class }} episode-multiple" title="{{ ep.full_tooltip }}">
+                                                    <div class="episode-header">
+                                                        <span class="episode-number">{{ ep.formatted_season_episode }}</span>
                                                         {% if badge %}
                                                         <span class="episode-badge {{ badge.type }}" style="background: {{ badge.color }}20; color: {{ badge.color }}; border: 1px solid {{ badge.color }}40;" title="{{ badge.text }}">
                                                             <i class="fas {{ badge.icon }}"></i> {{ badge.text }}
                                                         </span>
                                                         {% endif %}
-                                                    </div>
-                                                </div>
-                                                {% else %}
-                                                <div class="episode-item {{ status_class }} episode-multiple" title="{{ ep.full_tooltip }}">
-                                                    <div class="episode-header">
-                                                        <span class="episode-number">{{ ep.formatted_season_episode }}</span>
                                                         <span class="episode-date">{{ ep.air_date|format_date }}</span>
                                                         <span class="episode-days {{ get_days_class(ep.days_until) }}">{{ get_days_text(ep.days_until) }}</span>
                                                     </div>
                                                     <div class="episode-titles">
                                                         {{ ep.titles_display }} ({{ ep.individual_episode_count }} eps)
-                                                        {% if badge %}
-                                                        <span class="episode-badge {{ badge.type }}" style="background: {{ badge.color }}20; color: {{ badge.color }}; border: 1px solid {{ badge.color }}40;" title="{{ badge.text }}">
-                                                            <i class="fas {{ badge.icon }}"></i> {{ badge.text }}
-                                                        </span>
-                                                        {% endif %}
                                                     </div>
                                                 </div>
                                                 {% endif %}
