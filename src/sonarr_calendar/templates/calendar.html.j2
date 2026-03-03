@@ -35,9 +35,11 @@
             --premiere-color: #00FF00;
             --season-finale-color: #FFA500;
             --series-finale-color: #FF0000;
-            /* New colors for mid‑season badges */
-            --midseason-premiere-color: #00CED1;  /* turquoise */
-            --midseason-finale-color: #FF8C00;    /* dark orange */
+            --midseason-premiere-color: #00CED1;
+            --midseason-finale-color: #FF8C00;
+            /* New badge colors */
+            --series-premiere-color: #FFD700;  /* gold */
+            --special-color: #9C27B0;          /* purple */
         }
 
         /* Light theme */
@@ -278,7 +280,7 @@
         }
         .completed-seasons-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); /* increased from 300px to 350px */
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
             gap: 20px;
         }
         .show-card-wrapper {
@@ -326,8 +328,8 @@
         .completed-season-img {
             width: 100%;
             height: 100%;
-            object-fit: contain; /* changed from cover to contain */
-            background: var(--card-bg); /* fallback background */
+            object-fit: contain;
+            background: var(--card-bg);
         }
         .poster-placeholder-small {
             width: 100%;
@@ -523,7 +525,7 @@
             display: flex;
             flex-direction: column;
             height: 100%;
-            min-width: 0; /* Prevents grid items from expanding beyond column width */
+            min-width: 0;
         }
         .show-card-link:hover .show-card {
             transform: translateY(-10px);
@@ -533,7 +535,7 @@
         .card-header {
             position: relative;
             height: auto;
-            aspect-ratio: 16 / 9;  /* Adjust to 2/3 if using posters */
+            aspect-ratio: 16 / 9;
             max-height: 250px;
             overflow: hidden;
             flex-shrink: 0;
@@ -615,7 +617,7 @@
             flex-grow: 1;
             display: flex;
             flex-direction: column;
-            min-width: 0; /* Allow content to shrink below its intrinsic width */
+            min-width: 0;
             width: 100%;
         }
         .title-container {
@@ -624,7 +626,7 @@
             gap: 8px;
             margin-bottom: 5px;
             min-width: 0;
-            overflow: hidden; /* Ensure it contains the title */
+            overflow: hidden;
             width: 100%;
         }
         .show-title {
@@ -637,8 +639,8 @@
             flex: 1;
             min-width: 0;
             max-width: 100%;
-            overflow-wrap: break-word;   /* fallback for very long unbreakable words */
-            word-break: break-word;      /* ensures long words break if needed */
+            overflow-wrap: break-word;
+            word-break: break-word;
         }
         .season-complete-badge-inline {
             display: inline-flex;
@@ -757,7 +759,6 @@
             color: var(--series-finale-color);
             border: 1px solid var(--series-finale-color)40;
         }
-        /* New mid‑season badges */
         .episode-badge.midseason-premiere {
             background: var(--midseason-premiere-color)20;
             color: var(--midseason-premiere-color);
@@ -767,6 +768,17 @@
             background: var(--midseason-finale-color)20;
             color: var(--midseason-finale-color);
             border: 1px solid var(--midseason-finale-color)40;
+        }
+        /* New badges */
+        .episode-badge.series-premiere {
+            background: var(--series-premiere-color)20;
+            color: var(--series-premiere-color);
+            border: 1px solid var(--series-premiere-color)40;
+        }
+        .episode-badge.special {
+            background: var(--special-color)20;
+            color: var(--special-color);
+            border: 1px solid var(--special-color)40;
         }
         .episode-item.padding-item {
             background: rgba(255, 255, 255, 0.03);
