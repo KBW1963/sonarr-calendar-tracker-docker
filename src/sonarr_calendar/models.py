@@ -1,4 +1,4 @@
-# src/sonarr_calendar/models.py (DEBUG VERSION)
+# src/sonarr_calendar/models.py
 from dataclasses import dataclass, field
 from typing import List, Dict, Any, Optional, Tuple
 from datetime import date, datetime, timezone
@@ -9,6 +9,69 @@ from sonarr_calendar.image_cache import get_poster_url
 from sonarr_calendar.utils import get_progress_bar_color, days_until
 
 logger = logging.getLogger(__name__)
+
+# ============================================================================
+# Constants for display formatting
+# ============================================================================
+MAX_EPISODE_TITLE_LENGTH = 25
+MAX_MULTI_EPISODE_DISPLAY = 2
+MAX_EPISODE_LIST_LENGTH = 15
+
+# ============================================================================
+# Helper functions for formatting multi‑episode displays
+# ============================================================================
+
+def truncate_text(text, max_length):
+    if not text:
+        return text
+    if len(text) <= max_length:
+        return text
+    return text[:max_length-3] + "..."
+
+def format_multi_episode_display(episodes_info):
+    episode_count = len(episodes_info['episodes'])
+    season_num = episodes_info['seasons'][0] if episodes_info['seasons'] else 0
+
+    if len(episodes_info['episodes']) == 1:
+        episode_range = f"E{episodes_info['episodes'][0]:02d}"
+    else:
+        ep_list = sorted(episodes_info['episodes'])
+        consecutive = all(ep_list[i] + 1 == ep_list[i + 1] for i in range(len(ep_list) - 1))
+        if consecutive and len(ep_list) > 1:
+            episode_range = f"E{ep_list[0]:02d}-E{ep_list[-1]:02d}"
+        else:
+            if len(ep_list) > 3:
+                first_few = [f"E{e:02d}" for e in ep_list[:2]]
+                episode_range = f"{', '.join(first_few)} +{len(ep_list)-2} more"
+            else:
+                episode_range = f"{', '.join([f'E{e:02d}' for e in ep_list])}"
+
+    formatted_number = f"S{season_num:02d} {episode_range}"
+
+    titles = episodes_info.get('titles', [])
+    truncated_titles = episodes_info.get('truncated_titles', [])
+
+    if episode_count == 1:
+        titles_display = truncated_titles[0] if truncated_titles else "Episode"
+    else:
+        if episode_count <= MAX_MULTI_EPISODE_DISPLAY:
+            titles_display = f"{episode_count} Episodes: {', '.join(truncated_titles[:MAX_MULTI_EPISODE_DISPLAY])}"
+        else:
+            titles_display = f"{episode_count} Episodes: {', '.join(truncated_titles[:MAX_MULTI_EPISODE_DISPLAY])} +{episode_count - MAX_MULTI_EPISODE_DISPLAY} more"
+
+    if len(titles_display) > MAX_EPISODE_LIST_LENGTH:
+        titles_display = titles_display[:MAX_EPISODE_LIST_LENGTH-3] + "..."
+
+    full_tooltip = f"Season {season_num}\n"
+    for i, (ep_num, title) in enumerate(zip(episodes_info['episodes'], titles), 1):
+        full_tooltip += f"E{ep_num:02d}: {title}\n"
+
+    return {
+        'formatted_number': formatted_number,
+        'titles_display': titles_display,
+        'full_tooltip': full_tooltip.strip(),
+        'episode_count': episode_count
+    }
 
 # ============================================================================
 # Data models
@@ -76,13 +139,14 @@ class Episode:
     monitored: bool
     overview: Optional[str]
     episode_type: Optional[str] = None
-    days_until: int = 0
-    formatted_season_episode: str = ""
+    # Multi‑episode grouping fields
     single_episode: bool = True
-    full_title: str = ""
-    individual_episode_count: int = 1
+    formatted_season_episode: str = ""
     titles_display: str = ""
     full_tooltip: str = ""
+    individual_episode_count: int = 1
+    days_until: int = 0
+    full_title: str = ""
 
     @classmethod
     def from_api(cls, data: Dict[str, Any]) -> 'Episode':
@@ -105,10 +169,12 @@ class Episode:
             overview=data.get('overview', ''),
             episode_type=ep_type,
             days_until=days,
-            formatted_season_episode=formatted,
             full_title=title_str,
+            formatted_season_episode=formatted,
+            single_episode=True,
             titles_display=title_str,
-            full_tooltip=title_str
+            full_tooltip=title_str,
+            individual_episode_count=1
         )
 
 @dataclass
@@ -134,7 +200,6 @@ class ProcessedShow:
     current_season_episodes: int
     current_season_downloaded: int
     season_episode_counts: Dict[int, int]
-
     poster_url_poster: Optional[str] = None
     episodes_in_range: List[Episode] = field(default_factory=list)
     date_range_episodes: int = 0
@@ -211,24 +276,94 @@ def process_calendar_data(
     config
 ) -> List[ProcessedShow]:
     series_map = {s['id']: SeriesInfo.from_api(s) for s in all_series}
-    ep_by_series = defaultdict(list)
 
-    # DEBUG: log every episode as it is created
+    # First, convert all episodes to Episode objects and group by series and date
+    raw_episodes_by_series_and_date = defaultdict(lambda: defaultdict(list))
     for ep in episodes:
         episode_obj = Episode.from_api(ep)
-        logger.info(f"EPISODE: series={episode_obj.series_id} "
-                    f"S{episode_obj.season_number:02d}E{episode_obj.episode_number:02d} "
-                    f"air={episode_obj.air_date} type={episode_obj.episode_type} "
-                    f"title={episode_obj.title}")
-        ep_by_series[ep['seriesId']].append(episode_obj)
+        series_id = ep['seriesId']
+        air_date = episode_obj.air_date
+        if air_date:
+            raw_episodes_by_series_and_date[series_id][air_date].append(episode_obj)
 
     processed = []
-    for series_id, eps in ep_by_series.items():
+    for series_id, date_dict in raw_episodes_by_series_and_date.items():
         series = series_map.get(series_id)
         if not series:
             logger.warning(f"Series {series_id} not found, skipping")
             continue
 
+        # Group episodes by date, creating multi‑episode objects when needed
+        grouped_episodes = []
+        total_individual_episodes = 0
+
+        # Sort dates to process in order (optional)
+        for air_date, ep_list in sorted(date_dict.items()):
+            ep_list.sort(key=lambda x: (x.season_number, x.episode_number))
+            if len(ep_list) == 1:
+                # Single episode – use as is
+                grouped_episodes.append(ep_list[0])
+                total_individual_episodes += 1
+            else:
+                # Multiple episodes on same date – create a grouped episode object
+                titles = [ep.title for ep in ep_list]
+                truncated_titles = [truncate_text(ep.title, MAX_EPISODE_TITLE_LENGTH) for ep in ep_list]
+                seasons = list(set(ep.season_number for ep in ep_list))
+                episodes_nums = [ep.episode_number for ep in ep_list]
+
+                episodes_info = {
+                    'titles': titles,
+                    'truncated_titles': truncated_titles,
+                    'seasons': seasons,
+                    'episodes': episodes_nums,
+                    'episode_count': len(ep_list)
+                }
+
+                formatted = format_multi_episode_display(episodes_info)
+
+                # Determine combined status: has_file if all have file, monitored if any monitored
+                all_have_file = all(ep.has_file for ep in ep_list)
+                any_monitored = any(ep.monitored for ep in ep_list)
+                # Use the first episode's overview? We'll keep blank for grouped.
+                # For badge, we can use the first episode's type (if consistent) or None
+                # But badge will be determined by template using the grouped episode's fields.
+                # We'll store the type of the first episode; template can still call get_episode_badge.
+                # The grouped episode's episode_type will be passed to get_episode_badge.
+                # However, if multiple episodes have different types, we might need to decide.
+                # We'll use the type of the first episode, as it's the most common.
+                badge_type = ep_list[0].episode_type if ep_list else None
+
+                # Create a grouped episode
+                first_ep = ep_list[0]
+                grouped_ep = Episode(
+                    series_id=first_ep.series_id,
+                    season_number=seasons[0] if seasons else 0,
+                    episode_number=episodes_nums[0],  # not used for display
+                    title=first_ep.title,  # not used for display
+                    air_date=air_date,
+                    has_file=all_have_file,
+                    monitored=any_monitored,
+                    overview="",  # no overview for group
+                    episode_type=badge_type,
+                    single_episode=False,
+                    formatted_season_episode=formatted['formatted_number'],
+                    titles_display=formatted['titles_display'],
+                    full_tooltip=formatted['full_tooltip'],
+                    individual_episode_count=len(ep_list),
+                    days_until=first_ep.days_until,
+                    full_title=first_ep.full_title
+                )
+                grouped_episodes.append(grouped_ep)
+                total_individual_episodes += len(ep_list)
+
+        # Now we have grouped_episodes list for this series
+        # Filter those within the date range (they already are, but ensure)
+        in_range = [ep for ep in grouped_episodes if ep.air_date and date_range.start <= ep.air_date <= date_range.end]
+
+        # Debug: log grouping results (uncomment if needed)
+        # logger.info(f"Series {series_id}: {len(grouped_episodes)} grouped items, {len(in_range)} in range, total indiv episodes {total_individual_episodes}")
+
+        # Calculate progress for the series
         poster_url = get_poster_url(series, config.image_quality, config.sonarr_url)
         poster_url_poster = get_poster_url(series, 'poster', config.sonarr_url)
 
@@ -238,9 +373,13 @@ def process_calendar_data(
          cur_eps, cur_down,
          cur_cur) = calculate_progress(series)
 
-        in_range = [e for e in eps if e.air_date and date_range.start <= e.air_date <= date_range.end]
-        range_downloaded = sum(1 for e in in_range if e.has_file)
-        range_percent = (range_downloaded / len(in_range) * 100) if in_range else 0
+        # Count downloaded episodes in range (respecting multi‑episode counts)
+        range_downloaded = 0
+        for ep in in_range:
+            if ep.has_file:
+                range_downloaded += ep.individual_episode_count
+
+        range_percent = (range_downloaded / total_individual_episodes * 100) if total_individual_episodes > 0 else 0
         range_color = get_progress_bar_color(range_percent)
 
         processed.append(ProcessedShow(
@@ -267,7 +406,7 @@ def process_calendar_data(
             season_episode_counts=series.season_episode_counts,
             poster_url_poster=poster_url_poster,
             episodes_in_range=in_range,
-            date_range_episodes=len(in_range),
+            date_range_episodes=total_individual_episodes,
             date_range_downloaded=range_downloaded,
             date_range_percentage=range_percent,
             date_range_color=range_color
@@ -327,7 +466,6 @@ def calculate_completed_seasons_in_range(
     sonarr_client
 ) -> List[Dict]:
     completed = []
-    # Debug lines commented out
     for show in shows:
         if not show.current_season_complete:
             continue
