@@ -5,8 +5,8 @@ services:
     restart: unless-stopped
     environment:
       # Required
-      - SONARR_URL=http://192.168.0.226:30023                  # URL to your Sonarr instance (use the service name 'sonarr' if it's in the same Docker network) 
-      - SONARR_API_KEY=f9868e5f81644246988ffc6d3ba47aa8           # API key from Sonarr (Settings > General > Security)
+      - SONARR_URL=http://192.168.1.100:8989                  # URL to your Sonarr instance (use the service name 'sonarr' if it's in the same Docker network) 
+      - SONARR_API_KEY=Your_secret_API_Key           # API key from Sonarr (Settings > General > Security)
       - DAYS_PAST=7
       - DAYS_FUTURE=30
       - OUTPUT_HTML_FILE=/output/TV.html                   # output HTML file path (must be in a mounted volume)
@@ -31,3 +31,4 @@ networks:
   sonarr-network:
 
     driver: bridge
+
