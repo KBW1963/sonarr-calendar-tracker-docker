@@ -1,4 +1,4 @@
-Provide as an overview for those who are interested and have a Docker environment to follow/test.
+Provided as an overview for those who are interested and have a Docker environment to follow/test.
 ```
 1. Project Structure
    Project has the following layout (relative to the Dockerfile):
@@ -39,7 +39,8 @@ htmlcov
 sonarr_images
 sonarr_calendar.html
 sonarr_calendar_data.json
-README.md
+*.md
+*.py
 ```
 ---
 3. Create the Dockerfile
@@ -94,21 +95,21 @@ services:
     restart: unless-stopped
     environment:
       # Required
-      - SONARR_URL=http://192.168.0.226:30023                  # URL to your Sonarr instance (use the service name 'sonarr' if it's in the same Docker network) 
-      - SONARR_API_KEY=f9868e5f81644246988ffc6d3ba47aa8           # API key from Sonarr (Settings > General > Security)
+      - SONARR_URL=http://192.168.0.100:8989              # URL to your Sonarr instance (use the service name 'sonarr' if it's in the same Docker network) 
+      - SONARR_API_KEY=Your_Secret_API_key                # API key from Sonarr (Settings > General > Security)
       - DAYS_PAST=7
       - DAYS_FUTURE=30
-      - OUTPUT_HTML_FILE=/output/TV.html                   # output HTML file path (must be in a mounted volume)
+      - OUTPUT_HTML_FILE=/output/TV.html                  # output HTML file path (must be in a mounted volume)
       # Optional (with defaults shown)
       # - OUTPUT_JSON_FILE=/output/sonarr_data.json       # optional – remove if not wanted
       - IMAGE_CACHE_DIR=/cache                            # default: sonarr_images
       - REFRESH_INTERVAL_HOURS=6                          # default: 6
       - HTML_THEME=dark                                   # default: dark
-      - GRID_COLUMNS=4                                     # default: 4
-      - IMAGE_QUALITY=fanart                               # default: fanart
-      - ENABLE_IMAGE_CACHE=true                            # default: true
-      - HTML_TITLE="My Sonarr Dashboard"                   # default: Sonarr Calendar Pro
-      - TZ=Europe/London                                   # for correct log timestamps
+      - GRID_COLUMNS=4                                    # default: 4
+      - IMAGE_QUALITY=fanart                              # default: fanart
+      - ENABLE_IMAGE_CACHE=true                           # default: true
+      - HTML_TITLE="My Sonarr Dashboard"                  # default: Sonarr Calendar Pro
+      - TZ=Europe/London                                  # for correct log timestamps
     volumes:
       - ./output:/output
       - ./cache:/cache
@@ -140,5 +141,6 @@ View logs
 ```
 docker-compose logs -f
 ```
+
 
 
