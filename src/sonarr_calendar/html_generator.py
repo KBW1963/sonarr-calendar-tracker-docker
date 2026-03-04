@@ -6,6 +6,7 @@ from datetime import datetime, timedelta, timezone
 import base64
 import logging
 
+from sonarr_calendar import __display_version__  # <-- import display version
 from sonarr_calendar.models import ProcessedShow
 from sonarr_calendar.utils import (
     DateRange,
@@ -57,8 +58,7 @@ class HTMLGenerator:
         self.env.globals['now'] = lambda: datetime.now(timezone.utc)
 
     def generate(self, shows: List[ProcessedShow], episodes: List[Dict], date_range: DateRange, sonarr_client) -> str:
-        # DEBUG: The following lines are commented out for normal operation.
-        # Uncomment them to see detailed information about the shows list and completed seasons.
+        # DEBUG lines are commented out for normal operation
         # logger.info("\n=== DEBUG in html_generator.generate ===")
         # logger.info(f"shows list has {len(shows)} items")
         # if shows:
@@ -82,7 +82,7 @@ class HTMLGenerator:
             episodes=episodes,
             date_range=date_range,
             config=self.config,
-            version="2.6.0",
+            version=__display_version__,  # <-- use display version with image type suffix
             sonarr_icon_base64=SONARR_ICON_BASE64,
             overall_stats=overall_stats,
             completed_seasons=completed_seasons,
