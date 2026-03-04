@@ -41,7 +41,6 @@
             --special-color: #9C27B0;
         }
 
-        /* Light theme */
         .theme-light {
             --background-color: #F5F5F5;
             --legend-text-color: #333333;
@@ -55,7 +54,6 @@
             color: #000000;
         }
 
-        /* Fixed dark sections */
         .completed-seasons-section {
             background: var(--completed-section-bg) !important;
             padding: 25px;
@@ -221,6 +219,7 @@
             margin: 0 auto 20px;
             backdrop-filter: blur(10px);
         }
+        <!-- ========== CHANGED: Summary grid now uses range_stats (previously overall_stats) ========== -->
         .summary-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -436,7 +435,8 @@
         .filter-radio {
             display: none;
         }
-        #filter-all:checked ~ .shows-grid .show-card-wrapper {
+        #filter-all:checked ~ .shows-grid .show-card-wrapper,
+        #filter-all:checked ~ .shows-grid .show-card-wrapper .show-card {
             display: block;
         }
         #filter-complete:checked ~ .shows-grid .show-card-wrapper .show-card[data-progress] {
@@ -663,14 +663,15 @@
             padding-bottom: 5px;
         }
         .episodes-list {
-            max-height: min(200px, 40vh);
-            overflow-y: auto;
+            overflow-y: hidden; /* no scroll when collapsed */
             padding-right: 5px;
             -webkit-overflow-scrolling: touch;
             transition: max-height 0.3s ease;
-            min-height: calc(var(--episode-item-height) * var(--episode-limit) + var(--expand-button-height));
+            min-height: calc(var(--episode-item-height) * var(--episode-limit) + var(--expand-button-height) + 40px);
+            max-height: calc(var(--episode-item-height) * var(--episode-limit) + var(--expand-button-height) + 40px);
         }
         .episodes-list.expanded {
+            overflow-y: auto;
             max-height: 400px;
         }
         .episodes-list::-webkit-scrollbar {
@@ -724,13 +725,13 @@
             border-radius: 12px;
             font-size: 0.7em;
             font-weight: 600;
-            margin-left: 6px;
-            margin-right: 6px;
             vertical-align: middle;
             white-space: nowrap;
             max-width: 120px;
             overflow: hidden;
             text-overflow: ellipsis;
+            margin-left: auto;
+            margin-right: 0;
         }
         .episode-badge i {
             font-size: 0.8em;
@@ -795,8 +796,11 @@
             margin-bottom: 4px;
             font-size: 0.85em;
             align-items: center;
-            flex-wrap: nowrap;
+            flex-wrap: wrap;
             gap: 4px;
+        }
+        .episode-header .episode-badge {
+            display: none;
         }
         .episode-number {
             font-weight: bold;
@@ -841,8 +845,13 @@
             color: var(--text-color);
             display: flex;
             align-items: center;
+            justify-content: space-between;
             flex-wrap: wrap;
             gap: 4px;
+        }
+        .episode-title .episode-badge {
+            display: inline-flex;
+            margin-left: auto;
         }
         .episode-multiple .episode-titles {
             font-size: 0.9em;
@@ -861,6 +870,7 @@
             width: 100%;
             padding: 12px 16px;
             margin-top: 10px;
+            margin-bottom: 0;
             background: rgba(0, 180, 219, 0.1);
             border: 1px solid var(--primary-color);
             color: var(--primary-color);
@@ -875,6 +885,7 @@
             transition: all 0.3s ease;
             height: var(--expand-button-height);
             min-height: 44px;
+            box-sizing: border-box;
         }
         .expand-episodes-btn:hover {
             background: rgba(0, 180, 219, 0.2);
@@ -1087,7 +1098,6 @@
             <i class="fas fa-arrow-up"></i>
         </a>
 
-        {# Filter radio buttons #}
         <input type="radio" name="filter" id="filter-all" class="filter-radio" checked>
         <input type="radio" name="filter" id="filter-complete" class="filter-radio">
         <input type="radio" name="filter" id="filter-high-progress" class="filter-radio">
@@ -1104,39 +1114,40 @@
                 ({{ date_range.total_days }} days total)
             </div>
 
+            <!-- ========== CHANGED: Summary grid now uses range_stats (previously overall_stats) ========== -->
             <div class="summary-grid">
                 <div class="summary-card">
-                    <div class="summary-number">{{ overall_stats.total_series }}</div>
+                    <div class="summary-number">{{ range_stats.total_series }}</div>
                     <div class="summary-label">Total Shows</div>
-                    <div class="summary-subtext">{{ overall_stats.shows_with_episodes }} with episodes in range</div>
+                    <div class="summary-subtext">{{ range_stats.shows_with_episodes }} with episodes in range</div>
                 </div>
                 <div class="summary-card">
-                    <div class="summary-number">{{ overall_stats.episodes_in_range }}</div>
+                    <div class="summary-number">{{ range_stats.episodes_in_range }}</div>
                     <div class="summary-label">Episodes in Range</div>
-                    <div class="summary-subtext">{{ overall_stats.downloaded_in_range }} downloaded</div>
+                    <div class="summary-subtext">{{ range_stats.downloaded_in_range }} downloaded</div>
                 </div>
                 <div class="summary-card">
-                    <div class="summary-number">{{ overall_stats.shows_complete }}</div>
+                    <div class="summary-number">{{ range_stats.shows_complete }}</div>
                     <div class="summary-label">Shows with Completed Season</div>
                     <div class="summary-subtext">Current season complete</div>
                 </div>
                 <div class="summary-card">
-                    <div class="summary-number">{{ overall_stats.shows_high_progress }}</div>
+                    <div class="summary-number">{{ range_stats.shows_high_progress }}</div>
                     <div class="summary-label">High Progress</div>
                     <div class="summary-subtext">75-99% downloaded</div>
                 </div>
                 <div class="summary-card">
-                    <div class="summary-number">{{ overall_stats.shows_medium_progress }}</div>
+                    <div class="summary-number">{{ range_stats.shows_medium_progress }}</div>
                     <div class="summary-label">Medium Progress</div>
                     <div class="summary-subtext">25-74% downloaded</div>
                 </div>
                 <div class="summary-card">
-                    <div class="summary-number">{{ overall_stats.shows_low_progress }}</div>
+                    <div class="summary-number">{{ range_stats.shows_low_progress }}</div>
                     <div class="summary-label">Low Progress</div>
                     <div class="summary-subtext">1-24% downloaded</div>
                 </div>
                 <div class="summary-card">
-                    <div class="summary-number">{{ overall_stats.shows_not_started }}</div>
+                    <div class="summary-number">{{ range_stats.shows_not_started }}</div>
                     <div class="summary-label">Not Started</div>
                     <div class="summary-subtext">0% downloaded</div>
                 </div>
@@ -1183,46 +1194,47 @@
             </div>
         </div>
 
+        <!-- ========== CHANGED: Overall progress section now uses library_stats and range_stats ========== -->
         <div class="overall-progress-section">
             <div class="stat-progress">
                 <div class="stat-progress-header">
                     <span>Complete Library Progress</span>
-                    <span class="stat-progress-percentage">{{ "%.1f"|format(overall_stats.overall_progress) }}%</span>
+                    <span class="stat-progress-percentage">{{ "%.1f"|format(library_stats.overall_progress) }}%</span>
                 </div>
                 <div class="stat-progress-bar">
-                    <div class="stat-progress-fill" style="width: {{ overall_stats.overall_progress }}%; 
-                         background: {{ get_progress_bar_color(overall_stats.overall_progress) }};"></div>
+                    <div class="stat-progress-fill" style="width: {{ library_stats.overall_progress }}%; 
+                         background: {{ get_progress_bar_color(library_stats.overall_progress) }};"></div>
                 </div>
                 <div class="stat-progress-stats">
-                    {{ overall_stats.total_downloaded_all }}/{{ overall_stats.total_episodes_all }} episodes • 
-                    {{ overall_stats.total_series }} series
+                    {{ library_stats.total_downloaded_all }}/{{ library_stats.total_episodes_all }} episodes • 
+                    {{ library_stats.total_series }} series
                 </div>
             </div>
 
             <div class="stat-progress">
                 <div class="stat-progress-header">
                     <span>Date Range Progress ({{ date_range.start|format_date }} to {{ date_range.end|format_date }})</span>
-                    <span class="stat-progress-percentage">{{ "%.1f"|format(overall_stats.overall_date_range_progress) }}%</span>
+                    <span class="stat-progress-percentage">{{ "%.1f"|format(range_stats.overall_date_range_progress) }}%</span>
                 </div>
                 <div class="stat-progress-bar">
-                    <div class="stat-progress-fill" style="width: {{ overall_stats.overall_date_range_progress }}%; 
-                         background: {{ get_progress_bar_color(overall_stats.overall_date_range_progress) }};"></div>
+                    <div class="stat-progress-fill" style="width: {{ range_stats.overall_date_range_progress }}%; 
+                         background: {{ get_progress_bar_color(range_stats.overall_date_range_progress) }};"></div>
                 </div>
                 <div class="stat-progress-stats">
-                    {{ overall_stats.downloaded_in_range }}/{{ overall_stats.episodes_in_range }} episodes in date range
+                    {{ range_stats.downloaded_in_range }}/{{ range_stats.episodes_in_range }} episodes in date range
                 </div>
             </div>
         </div>
 
         <div class="filters">
-            <label for="filter-all" class="filter-btn active">All Shows ({{ overall_stats.total_series }})</label>
-            <label for="filter-complete" class="filter-btn">Season Complete ({{ overall_stats.shows_complete }})</label>
-            <label for="filter-high-progress" class="filter-btn">High Progress ({{ overall_stats.shows_high_progress }})</label>
-            <label for="filter-medium-progress" class="filter-btn">Medium Progress ({{ overall_stats.shows_medium_progress }})</label>
-            <label for="filter-low-progress" class="filter-btn">Low Progress ({{ overall_stats.shows_low_progress }})</label>
+            <label for="filter-all" class="filter-btn active">All Shows ({{ range_stats.total_series }})</label>
+            <label for="filter-complete" class="filter-btn">Season Complete ({{ range_stats.shows_complete }})</label>
+            <label for="filter-high-progress" class="filter-btn">High Progress ({{ range_stats.shows_high_progress }})</label>
+            <label for="filter-medium-progress" class="filter-btn">Medium Progress ({{ range_stats.shows_medium_progress }})</label>
+            <label for="filter-low-progress" class="filter-btn">Low Progress ({{ range_stats.shows_low_progress }})</label>
             <label for="filter-date-range-high" class="filter-btn">Date Range ≥75%</label>
             <label for="filter-date-range-low" class="filter-btn">Date Range <25%</label>
-            <label for="filter-has-episodes" class="filter-btn">Has Episodes ({{ overall_stats.shows_with_episodes }})</label>
+            <label for="filter-has-episodes" class="filter-btn">Has Episodes ({{ range_stats.shows_with_episodes }})</label>
         </div>
 
         <div class="progress-legend">
@@ -1283,32 +1295,32 @@
                                             <div class="episode-item {{ status_class }} {{ extra_class }} preview-episode" title="{{ ep.full_title }}">
                                                 <div class="episode-header">
                                                     <span class="episode-number">{{ ep.formatted_season_episode }}</span>
+                                                    <span class="episode-date">{{ ep.air_date|format_date }}</span>
+                                                    <span class="episode-days {{ get_days_class(ep.days_until) }}">{{ get_days_text(ep.days_until) }}</span>
+                                                </div>
+                                                <div class="episode-title">
+                                                    <span>{{ ep.title|truncate(25) }}</span>
                                                     {% if badge %}
                                                     <span class="episode-badge {{ badge.type }}" style="background: {{ badge.color }}20; color: {{ badge.color }}; border: 1px solid {{ badge.color }}40;" title="{{ badge.text }}">
                                                         <i class="fas {{ badge.icon }}"></i> {{ badge.text }}
                                                     </span>
                                                     {% endif %}
-                                                    <span class="episode-date">{{ ep.air_date|format_date }}</span>
-                                                    <span class="episode-days {{ get_days_class(ep.days_until) }}">{{ get_days_text(ep.days_until) }}</span>
-                                                </div>
-                                                <div class="episode-title">
-                                                    {{ ep.title|truncate(25) }}
                                                 </div>
                                             </div>
                                             {% else %}
                                             <div class="episode-item {{ status_class }} {{ extra_class }} episode-multiple preview-episode" title="{{ ep.full_tooltip }}">
                                                 <div class="episode-header">
                                                     <span class="episode-number">{{ ep.formatted_season_episode }}</span>
-                                                    {% if badge %}
-                                                    <span class="episode-badge {{ badge.type }}" style="background: {{ badge.color }}20; color: {{ badge.color }}; border: 1px solid {{ badge.color }}40;" title="{{ badge.text }}">
-                                                        <i class="fas {{ badge.icon }}"></i> {{ badge.text }}
-                                                    </span>
-                                                    {% endif %}
                                                     <span class="episode-date">{{ ep.air_date|format_date }}</span>
                                                     <span class="episode-days {{ get_days_class(ep.days_until) }}">{{ get_days_text(ep.days_until) }}</span>
                                                 </div>
                                                 <div class="episode-titles">
                                                     {{ ep.titles_display }} ({{ ep.individual_episode_count }} eps)
+                                                    {% if badge %}
+                                                    <span class="episode-badge {{ badge.type }}" style="background: {{ badge.color }}20; color: {{ badge.color }}; border: 1px solid {{ badge.color }}40;" title="{{ badge.text }}">
+                                                        <i class="fas {{ badge.icon }}"></i> {{ badge.text }}
+                                                    </span>
+                                                    {% endif %}
                                                 </div>
                                             </div>
                                             {% endif %}
@@ -1330,32 +1342,32 @@
                                                 <div class="episode-item {{ status_class }} {{ extra_class }}" title="{{ ep.full_title }}">
                                                     <div class="episode-header">
                                                         <span class="episode-number">{{ ep.formatted_season_episode }}</span>
+                                                        <span class="episode-date">{{ ep.air_date|format_date }}</span>
+                                                        <span class="episode-days {{ get_days_class(ep.days_until) }}">{{ get_days_text(ep.days_until) }}</span>
+                                                    </div>
+                                                    <div class="episode-title">
+                                                        <span>{{ ep.title|truncate(25) }}</span>
                                                         {% if badge %}
                                                         <span class="episode-badge {{ badge.type }}" style="background: {{ badge.color }}20; color: {{ badge.color }}; border: 1px solid {{ badge.color }}40;" title="{{ badge.text }}">
                                                             <i class="fas {{ badge.icon }}"></i> {{ badge.text }}
                                                         </span>
                                                         {% endif %}
-                                                        <span class="episode-date">{{ ep.air_date|format_date }}</span>
-                                                        <span class="episode-days {{ get_days_class(ep.days_until) }}">{{ get_days_text(ep.days_until) }}</span>
-                                                    </div>
-                                                    <div class="episode-title">
-                                                        {{ ep.title|truncate(25) }}
                                                     </div>
                                                 </div>
                                                 {% else %}
                                                 <div class="episode-item {{ status_class }} {{ extra_class }} episode-multiple" title="{{ ep.full_tooltip }}">
                                                     <div class="episode-header">
                                                         <span class="episode-number">{{ ep.formatted_season_episode }}</span>
-                                                        {% if badge %}
-                                                        <span class="episode-badge {{ badge.type }}" style="background: {{ badge.color }}20; color: {{ badge.color }}; border: 1px solid {{ badge.color }}40;" title="{{ badge.text }}">
-                                                            <i class="fas {{ badge.icon }}"></i> {{ badge.text }}
-                                                        </span>
-                                                        {% endif %}
                                                         <span class="episode-date">{{ ep.air_date|format_date }}</span>
                                                         <span class="episode-days {{ get_days_class(ep.days_until) }}">{{ get_days_text(ep.days_until) }}</span>
                                                     </div>
                                                     <div class="episode-titles">
                                                         {{ ep.titles_display }} ({{ ep.individual_episode_count }} eps)
+                                                        {% if badge %}
+                                                        <span class="episode-badge {{ badge.type }}" style="background: {{ badge.color }}20; color: {{ badge.color }}; border: 1px solid {{ badge.color }}40;" title="{{ badge.text }}">
+                                                            <i class="fas {{ badge.icon }}"></i> {{ badge.text }}
+                                                        </span>
+                                                        {% endif %}
                                                     </div>
                                                 </div>
                                                 {% endif %}
