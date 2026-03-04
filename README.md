@@ -94,7 +94,6 @@ services:
       - IMAGE_CACHE_DIR=/cache                       # default: sonarr_images
       - REFRESH_INTERVAL_HOURS=6                     # default: 6
       - HTML_THEME=dark                              # default: dark
-      - GRID_COLUMNS=4                               # default: 4
       - IMAGE_QUALITY=fanart                         # default: fanart
       - ENABLE_IMAGE_CACHE=true                      # default: true
       - HTML_TITLE="My Sonarr Dashboard"             # default: Sonarr Calendar Pro
@@ -131,7 +130,6 @@ Below is a complete list of supported variables, their requirements, description
 | `OUTPUT_JSON_FILE` | No | If set, a JSON file with metadata will be written to this path (inside a mounted volume). | (none) | `/output/data.json` |
 | `REFRESH_INTERVAL_HOURS` | No | Hours between automatic refreshes when running in daemon mode. | `6` | `12` |
 | `HTML_THEME` | No | Colour theme of the dashboard: `dark` or `light`. | `dark` | `light` |
-| `GRID_COLUMNS` | No | Number of show cards per row in the grid layout. | `4` | `3` |
 | `IMAGE_QUALITY` | No | Preferred image type. The actual selection priority is hard‑coded as: **fanart → poster → banner → any**. This variable is currently a hint; future versions may respect it more strictly. | `fanart` | `poster` |
 | `ENABLE_IMAGE_CACHE` | No | Whether to cache images locally. | `true` | `false` |
 | `HTML_TITLE` | No | Browser tab title for the generated HTML page. | `Sonarr Calendar Pro` | `My Sonarr Dashboard` |
@@ -182,6 +180,7 @@ nginx:
     - sonarr-calendar
 ```
 Then access `http://your-host-ip:8080/UpcomingTV.html`.
+
 
 
 
