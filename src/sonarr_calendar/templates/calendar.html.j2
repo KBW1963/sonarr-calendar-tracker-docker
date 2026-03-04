@@ -495,24 +495,9 @@
         }
         .shows-grid {
             display: grid;
-            grid-template-columns: 1fr;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 15px;
             margin-bottom: 40px;
-        }
-        @media (min-width: 600px) {
-            .shows-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-        @media (min-width: 768px) {
-            .shows-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
-        @media (min-width: 992px) {
-            .shows-grid {
-                grid-template-columns: repeat({{ config.grid_columns }}, 1fr);
-            }
         }
         .show-card {
             background: var(--card-bg);
@@ -728,10 +713,8 @@
         .episode-item.status-missing {
             border-left-color: var(--progress-not-started);
         }
-        /* Special episodes override – purple left border */
         .episode-item.episode-special {
             border-left-color: var(--special-color) !important;
-            
         }
         .episode-badge {
             display: inline-flex;
@@ -1286,7 +1269,6 @@
                                         {% for ep in show.episodes_in_range[:DISPLAY_EPISODES_LIMIT] %}
                                             {% set status_class = 'status-downloaded' if ep.has_file else ('status-monitored' if ep.monitored else 'status-missing') %}
                                             {% set badge = get_episode_badge(ep, show.season_episode_counts) %}
-                                            {# Add extra class for special episodes #}
                                             {% set extra_class = 'episode-special' if badge and badge.type == 'special' else '' %}
                                             {% if ep.single_episode %}
                                             <div class="episode-item {{ status_class }} {{ extra_class }} preview-episode" title="{{ ep.full_title }}">
