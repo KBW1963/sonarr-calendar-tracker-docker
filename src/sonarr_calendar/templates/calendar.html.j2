@@ -728,6 +728,9 @@
             margin-right: 6px;
             vertical-align: middle;
             white-space: nowrap;
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         .episode-badge i {
             font-size: 0.8em;
@@ -792,21 +795,27 @@
             margin-bottom: 4px;
             font-size: 0.85em;
             align-items: center;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
             gap: 4px;
         }
         .episode-number {
             font-weight: bold;
             color: var(--primary-color);
             white-space: nowrap;
+            min-width: 0;
+            flex-shrink: 1;
         }
         .episode-date {
             color: var(--text-secondary);
             white-space: nowrap;
+            min-width: 0;
+            flex-shrink: 1;
         }
         .episode-days {
             font-weight: 600;
             white-space: nowrap;
+            min-width: 0;
+            flex-shrink: 1;
         }
         .days-today {
             color: var(--progress-complete);
