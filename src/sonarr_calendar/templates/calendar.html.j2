@@ -7,6 +7,7 @@
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,{{ sonarr_icon_base64 }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* (all existing styles remain unchanged) */
         :root {
             --primary-color: #00b4db;
             --primary-dark: #0083b0;
@@ -219,7 +220,7 @@
             margin: 0 auto 20px;
             font-size: clamp(1rem, 4vw, 1.4rem);
             color: white;
-        /*    display: flex; */
+            /* display: flex; */
             align-items: center;
             gap: 8px;
             width: fit-content;
@@ -1150,7 +1151,7 @@
                 <!-- Card 3: Continuing vs Ended vs Upcoming -->
                 <div class="summary-card">
                     <p>
-                        Out of <strong>{{ library_stats.total_series|default(0) }}</strong> series you are monitoring,
+                        Out of <strong>{{ library_stats.total_series|default(0) }}</strong> shows in your library,
                         there are <strong>{{ library_stats.continuing_series|default(0) }}</strong> continuing,
                         <strong>{{ library_stats.ended_series|default(0) }}</strong> ended,
                         and <strong>{{ library_stats.upcoming_series|default(0) }}</strong> upcoming.
@@ -1175,13 +1176,13 @@
                 <!-- Card 1: shows with episodes in range -->
                 <div class="summary-card">
                     <p>
-                        There are <strong>{{ range_stats.shows_with_episodes }}</strong> shows with episodes in date range.
+                        There are <strong>{{ range_stats.shows_with_episodes }}</strong> shows with episodes in set date range.
                     </p>
                 </div>
                 <!-- Card 2: episodes in range with downloaded count -->
                 <div class="summary-card">
                     <p>
-                        <strong>{{ range_stats.episodes_in_range }}</strong> episodes in date range with
+                        <strong>{{ range_stats.episodes_in_range }}</strong> episodes in set date range with
                         <strong>{{ range_stats.downloaded_in_range }}</strong> episodes already downloaded.
                     </p>
                 </div>
@@ -1232,7 +1233,7 @@
                 </div>
                 <div class="stat-progress-stats">
                     {{ library_stats.total_downloaded_all }}/{{ library_stats.total_episodes_all }} episodes • 
-                    {{ library_stats.total_series }} series
+                    {{ library_stats.total_series }} shows
                 </div>
                 <!-- Footnote moved here -->
                 <div style="margin-top: 15px; font-size: 0.9em; opacity: 0.9; text-align: center; border-top: 1px solid var(--border-color); padding-top: 10px;">
@@ -1264,18 +1265,18 @@
                     <input type="text" id="titleSearch" placeholder="Search shows...">
                 </div>
 
-                <!-- Progress filter dropdown -->
+                <!-- Progress filter dropdown (UPDATED with range_stats counts) -->
                 <div class="filter-group">
                     <i class="fas fa-chart-line"></i>
                     <select id="progressFilter">
-                        <option value="all" selected>All Shows ({{ range_stats.total_series }})</option>
+                        <option value="all" selected>All Shows ({{ range_stats.total_series }} in range)</option>
                         <option value="complete">Season Complete ({{ range_stats.shows_complete }})</option>
-                        <option value="high">High Progress ({{ range_stats.shows_high_progress }})</option>
-                        <option value="medium">Medium Progress ({{ range_stats.shows_medium_progress }})</option>
-                        <option value="low">Low Progress ({{ range_stats.shows_low_progress }})</option>
-                        <option value="date-high">Date Range ≥75%</option>
-                        <option value="date-low">Date Range <25%</option>
-                        <option value="has-episodes">Has Episodes ({{ range_stats.shows_with_episodes }})</option>
+                        <option value="high">Overall Progress 75‑99% ({{ range_stats.shows_high_progress }})</option>
+                        <option value="medium">Overall Progress 25‑74% ({{ range_stats.shows_medium_progress }})</option>
+                        <option value="low">Overall Progress <25% ({{ range_stats.shows_low_progress + range_stats.shows_not_started }})</option>
+                        <option value="date-high">Date Range Progress ≥75%</option>
+                        <option value="date-low">Date Range Progress <25% (including 0%)</option>
+                        <option value="has-episodes">Has Episodes in Range ({{ range_stats.shows_with_episodes }})</option>
                     </select>
                 </div>
 
@@ -1349,8 +1350,9 @@
                                 </div>
                                 {% endif %}
                                 <div class="show-badge" title="Current Season">S{{ "%02d"|format(show.current_season) }}</div>
-                                <div class="status-overall" style="background: {{ show.progress_color }}; width: 27px; height: 27px;" 
-                                     title="Overall Progress: {{ "%.1f"|format(show.progress_percentage) }}%"></div>
+                                <!-- Dot color now uses date_range_color -->
+                                <div class="status-overall" style="background: {{ show.date_range_color }}; width: 27px; height: 27px;" 
+                                     title="Date Range Progress: {{ "%.1f"|format(show.date_range_percentage) }}%"></div>
                             </div>
                             <div class="card-content">
                                 <div class="title-container">
@@ -1661,13 +1663,13 @@
                             matchesProgress = progress >= 25 && progress < 75;
                             break;
                         case 'low':
-                            matchesProgress = progress > 0 && progress < 25;
+                            matchesProgress = progress < 25;  // includes 0%
                             break;
                         case 'date-high':
                             matchesProgress = dateRangeProgress >= 75;
                             break;
                         case 'date-low':
-                            matchesProgress = dateRangeProgress < 25 && dateRangeProgress > 0;
+                            matchesProgress = dateRangeProgress < 25;  // includes 0%
                             break;
                         case 'has-episodes':
                             matchesProgress = hasEpisodes;
@@ -1681,24 +1683,16 @@
             });
         }
 
-        // Title search
+        // Attach event listeners
         document.getElementById('titleSearch').addEventListener('input', applyFilters);
-
-        // Progress filter dropdown
         document.getElementById('progressFilter').addEventListener('change', applyFilters);
 
-        // Clear filters – also reset jump dropdown
+        // Clear filters
         document.getElementById('clearFilters').addEventListener('click', function() {
-            // Clear search
             document.getElementById('titleSearch').value = '';
-            // Reset progress filter to "all"
             document.getElementById('progressFilter').value = 'all';
-            // Reset jump dropdown to default
             const jumpSelect = document.getElementById('jumpToShow');
-            if (jumpSelect) {
-                jumpSelect.value = '#all';
-            }
-            // Apply filters (will show all)
+            if (jumpSelect) jumpSelect.value = '#all';
             applyFilters();
         });
 
