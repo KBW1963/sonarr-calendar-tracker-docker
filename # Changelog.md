@@ -7,6 +7,67 @@ Version numbers starting from 3.0.0 correspond to the Docker‑ready release.
 
 ---
 
+## [3.4.0] - 2026-03-06
+
+### Added
+
+- **Library Overview Section**
+  - New heading "Your current library overview" with a book icon, styled like the date box.
+  - Four sentence‑style summary cards using `library_stats`:
+    - Total shows and downloaded episodes.
+    - Missing monitored episodes (with conditional messaging).
+    - Continuing, ended, and upcoming series breakdown (now includes `upcoming` status).
+    - Future episodes count.
+- **Second Summary Row**
+  - Two cards showing `range_stats`:
+    - Number of shows with episodes in the selected date range.
+    - Total episodes in range and how many are already downloaded.
+- **Progress Legend**
+  - Moved next to the progress bars, now using mini progress bars instead of coloured squares.
+  - Integrated as a footer inside the unified filter bar.
+- **Unified Filter Bar**
+  - Combines search by title, progress filter dropdown, jump‑to‑show dropdown, and a clear‑filters button.
+  - Progress filter dropdown replaces old radio‑button filters and now works via JavaScript.
+  - Clear Filters button resets search, progress filter, and the jump dropdown.
+- **Overall Progress Footnote**
+  - Moved inside the "Complete Library Progress" box for better context.
+  - Wording updated to: “\* Overall progress includes all episodes, whether monitored or not.”
+
+### Changed
+
+- **Continuing Series Count** – Now correctly includes `upcoming` status (previously only `continuing`). This fixes a discrepancy where Sonarr reported 68 continuing but the app showed 66.
+- **Series‑Level Monitoring** – Added `monitored_series` and `unmonitored_series` to `library_stats` (available for future cards).
+- **Layout Adjustments**
+  - Date range line moved to between the two summary grids.
+  - Library heading now placed above the first grid, styled consistently with the date box.
+  - Progress legend and filter bar redesigned for a cleaner, more intuitive interface.
+- **Filtering Logic** – Switched from CSS‑based radio filtering to JavaScript for reliability and better integration with search.
+
+### Fixed
+
+- **Continuing Count** – Now correctly counts series with status `'upcoming'` as continuing.
+- **Progress Filter** – Previously non‑functional; now properly hides/shows cards based on the selected filter.
+- **Clear Filters** – Now also resets the jump‑to‑show dropdown to its default option.
+
+### Removed
+
+- Old radio‑button filter labels (the previous filter row) – replaced by the unified filter bar.
+- Outdated progress‑legend (the one with coloured squares) – replaced by the new mini‑bar legend.
+
+## [3.3.7] – 2026-03-04
+
+### Added
+
+- **Library‑wide statistics** – The top progress bar now shows the complete library progress (all series, not just those with episodes in the date range). A new function `calculate_library_statistics` sums data from all series fetched from Sonarr.
+
+### Changed
+
+- **Template variables** – The summary cards and date‑range progress bar now use `range_stats` (previously `overall_stats`) to correctly reflect the filtered date range. The library progress uses `library_stats`.
+
+### Fixed
+
+- **Overall progress accuracy** – Previously, the overall progress bar only considered shows with episodes in the current date range, which could be misleading. Now it accurately reflects the entire library.
+
 ## [3.3.6] – 2026-03-04
 
 ### Fixed
@@ -97,7 +158,8 @@ Version numbers starting from 3.0.0 correspond to the Docker‑ready release.
 
 - **Mid‑season badges** – Episodes now display `Mid‑Season Premiere` and `Mid‑Season Finale` badges using Sonarr's `episodeType` field.
 - **Completed seasons fallback with caching** – If a complete show has no episodes in the date range, the app now fetches all episodes for that
-  series (cached per run) to determine the last aired date. This ensures shows like “A Knight of the Seven Kingdoms” appear in the “Recently Completed
+  series (cached per run) to determine the last aired date. This ensures shows like “A Knight of the Seven Kingdoms” appear in the “Recently
+  Completed
   Seasons” section even when the final episode is missing from the calendar data.
 
 ### Changed
