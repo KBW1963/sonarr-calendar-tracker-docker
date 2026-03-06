@@ -9,6 +9,31 @@ Version numbers starting from 3.0.0 correspond to the Docker‑ready release.
 
 ## [3.4.0] - 2026-03-06
 
+### Changed
+
+- **Dot Color** – The small status dot on each show card now reflects **date range progress** instead of overall progress. This makes it immediately clear whether episodes in the current range are downloaded (green) or missing (red), even if the overall series is complete.
+- **Filter Dropdown Labels** – Clarified which filters apply to overall progress vs. date range progress:
+  - "Overall Progress 75‑99%", "Overall Progress 25‑74%", "Overall Progress <25%" use overall progress.
+  - "Date Range Progress ≥75%" and "Date Range Progress <25%" use date range progress.
+  - Counts for overall progress filters now correctly show the number of visible shows that fall into each category.
+
+### Fixed
+
+- **Filter Consistency** – All filters now work correctly on the visible shows (those with episodes in the selected date range).
+
+### Fixed
+
+- **Filter Dropdown Clarification** – Options now correctly reflect that filters apply only to shows with episodes in the current date range.
+  - "All Shows" now shows the count of visible shows (from `range_stats.total_series`).
+  - Overall progress counts (High, Medium, Low/Not Started) now use `range_stats` counts for the visible shows, eliminating confusion with global library counts.
+  - The dropdown text "Low/Not Started (<25%)" now correctly includes shows with 0% overall progress, matching the filter logic.
+- **Filter Logic** – No changes; already working correctly on visible cards.
+
+### Fixed
+
+- **Filter Logic** – "Date Range <25%" and "Low Progress" now correctly include shows with 0% progress, addressing an issue where shows with premieres in the date range but no downloads were not listed.
+- **Filter Label** – "Low Progress" renamed to "Low/Not Started (<25%)" to better reflect that it includes 0% progress shows.
+
 ### Added
 
 - **Library Overview Section**
