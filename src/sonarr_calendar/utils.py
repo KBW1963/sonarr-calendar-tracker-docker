@@ -205,6 +205,21 @@ def get_episode_badge(episode, season_episode_counts: Dict[int, int] = None) -> 
     # Series finale detection would require additional data (seasonCount) – not implemented here
     return None
 
+def get_episode_status_class(episode) -> str:
+    """
+    Return the CSS class for an episode based on its download status and monitored flag.
+    Possible return values:
+        - 'status-downloaded' if the episode has a file
+        - 'status-monitored' if it is monitored but missing
+        - 'status-missing' if it is not monitored and missing
+    """
+    if episode.has_file:
+        return "status-downloaded"
+    elif episode.monitored:
+        return "status-monitored"
+    else:
+        return "status-missing"
+
 def get_days_class(days: int) -> str:
     if days == 0:
         return "days-today"

@@ -14,6 +14,7 @@ from sonarr_calendar.utils import (
     format_date_for_display,
     slugify,
     get_episode_badge,
+    get_episode_status_class,   # <-- THIS MUST BE PRESENT
     get_days_class,
     get_days_text
 )
@@ -52,6 +53,7 @@ class HTMLGenerator:
         # Register global functions/variables
         self.env.globals['get_progress_bar_color'] = get_progress_bar_color
         self.env.globals['get_episode_badge'] = get_episode_badge
+        self.env.globals['get_episode_status_class'] = get_episode_status_class   # <-- THIS LINE
         self.env.globals['get_days_class'] = get_days_class
         self.env.globals['get_days_text'] = get_days_text
         self.env.globals['timedelta'] = timedelta
