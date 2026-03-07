@@ -8,6 +8,11 @@ Version numbers starting from 3.0.0 correspond to the Docker‑ready release.
 ---
 
 ## [3.4.0] - 2026-03-06
+
+### Fixed
+
+- **Import Error** – Added missing `get_episode_status_class` to the import list in `html_generator.py` and ensured the function is defined in `utils.py`.
+
 ### Changed
 
 - **Badge Styling** – Moved episode badge inline styles to dedicated CSS classes (`.badge-premiere`, `.badge-season-finale`, etc.). This improves maintainability and reduces inline style calculations.
@@ -273,4 +278,5 @@ Version numbers starting from 3.0.0 correspond to the Docker‑ready release.
 - NameError in connection test (moved requests import inside class).
 
 _Note: This version is the last pre‑Docker release. Docker versions start at 3.0.0._
+
 
