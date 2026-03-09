@@ -224,6 +224,7 @@
             gap: 15px;
         }
 
+        /* Library heading – background only as wide as text */
         .library-heading {
             background: rgba(255,255,255,0.1);
             padding: 10px 20px;
@@ -236,7 +237,7 @@
             color: white;
             text-align: left;
             margin-bottom: 20px;
-}
+        }
 
         /* ---------- Summary Grid (Sentence Cards) ---------- */
         .summary-grid {
@@ -1222,7 +1223,7 @@
                     <input type="text" id="titleSearch" placeholder="Search shows...">
                 </div>
 
-                <!-- Progress filter dropdown (UPDATED: season progress) -->
+                <!-- Progress filter dropdown (season progress) -->
                 <div class="filter-group">
                     <i class="fas fa-chart-line"></i>
                     <select id="progressFilter">
@@ -1446,20 +1447,7 @@
                                 </div>
 
                                 <div class="progress-section">
-                                    <div class="progress-item">
-                                        <div class="progress-header">
-                                            <span>Overall Progress</span>
-                                            <span class="progress-percentage">{{ "%.1f"|format(show.progress_percentage) }}%</span>
-                                        </div>
-                                        <div class="progress-bar">
-                                            <div class="progress-fill" style="width: {{ show.progress_percentage }}%; background: {{ show.progress_color }};"></div>
-                                        </div>
-                                        <div class="progress-stats">
-                                            {{ show.downloaded_episodes }}/{{ show.total_episodes }} episodes • 
-                                            Season {{ show.current_season }}: {{ "%.0f"|format(show.current_season_progress) }}%
-                                        </div>
-                                    </div>
-
+                                    <!-- Date Range Progress (now first) -->
                                     <div class="progress-item">
                                         <div class="progress-header">
                                             <span>Date Range Progress</span>
@@ -1473,6 +1461,7 @@
                                         </div>
                                     </div>
 
+                                    <!-- Current Season Progress (now second) -->
                                     <div class="progress-item">
                                         <div class="progress-header">
                                             <span>Current Season (S{{ show.current_season }})</span>
@@ -1484,6 +1473,21 @@
                                         </div>
                                         <div class="progress-stats">
                                             {{ show.current_season_downloaded }}/{{ show.current_season_episodes }} episodes
+                                        </div>
+                                    </div>
+
+                                    <!-- Overall Progress (now last) -->
+                                    <div class="progress-item">
+                                        <div class="progress-header">
+                                            <span>Overall Progress</span>
+                                            <span class="progress-percentage">{{ "%.1f"|format(show.progress_percentage) }}%</span>
+                                        </div>
+                                        <div class="progress-bar">
+                                            <div class="progress-fill" style="width: {{ show.progress_percentage }}%; background: {{ show.progress_color }};"></div>
+                                        </div>
+                                        <div class="progress-stats">
+                                            {{ show.downloaded_episodes }}/{{ show.total_episodes }} episodes • 
+                                            Season {{ show.current_season }}: {{ "%.0f"|format(show.current_season_progress) }}%
                                         </div>
                                     </div>
                                 </div>
