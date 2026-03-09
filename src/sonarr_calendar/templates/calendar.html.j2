@@ -1297,7 +1297,7 @@
 
             <div class="stat-progress">
                 <div class="stat-progress-header">
-                    <span>Date Range Progress ({{ date_range.start|format_date }} to {{ date_range.end|format_date }})</span>
+                    <span><i class="fas fa-calendar-alt" style="margin-right: 5px;"></i> Date Range Progress ({{ date_range.start|format_date }} to {{ date_range.end|format_date }})</span>
                     <span class="stat-progress-percentage">{{ "%.1f"|format(range_stats.overall_date_range_progress) }}%</span>
                 </div>
                 <div class="stat-progress-bar">
@@ -1330,6 +1330,19 @@
                         <option value="date-high">Date Range Progress ≥75%</option>
                         <option value="date-low">Date Range Progress <25% (including 0%)</option>
                         <option value="has-episodes">Has Episodes in Range ({{ range_stats.shows_with_episodes }})</option>
+                    </select>
+                </div>
+
+                <!-- Sort dropdown -->
+                <div class="filter-group">
+                    <i class="fas fa-sort-amount-down"></i>
+                    <select id="sortFilter">
+                        <option value="title">Sort by Title (A-Z)</option>
+                        <option value="progress-desc">Overall Progress (High to Low)</option>
+                        <option value="progress-asc">Overall Progress (Low to High)</option>
+                        <option value="season-progress-desc">Season Progress (High to Low)</option>
+                        <option value="season-progress-asc">Season Progress (Low to High)</option>
+                        <option value="next-episode">Next Episode (Earliest first)</option>
                     </select>
                 </div>
 
@@ -1387,7 +1400,9 @@
                              data-season-progress="{{ show.current_season_progress }}"
                              data-date-range-progress="{{ show.date_range_percentage }}"
                              data-has-episodes="{{ 'true' if show.date_range_episodes > 0 else 'false' }}"
-                             data-season-complete="{{ 'true' if show.current_season_complete else 'false' }}">
+                             data-season-complete="{{ 'true' if show.current_season_complete else 'false' }}"
+                             data-title="{{ show.title|lower }}"
+                             data-next-episode="{{ show.next_episode_timestamp }}">
                             <div class="card-header">
                                 {% if show.poster_url %}
                                 <div class="poster-container">
@@ -1542,7 +1557,7 @@
                                 </div>
 
                                 <div class="progress-section">
-                                    <!-- Date Range Progress (now first) with calendar icon -->
+                                    <!-- Date Range Progress with calendar icon -->
                                     <div class="progress-item">
                                         <div class="progress-header">
                                             <span><i class="fas fa-calendar-alt" style="margin-right: 5px;"></i> Date Range Progress</span>
@@ -1556,7 +1571,7 @@
                                         </div>
                                     </div>
 
-                                    <!-- Current Season Progress (now second) -->
+                                    <!-- Current Season Progress -->
                                     <div class="progress-item">
                                         <div class="progress-header">
                                             <span>Current Season (S{{ show.current_season }})</span>
@@ -1571,7 +1586,7 @@
                                         </div>
                                     </div>
 
-                                    <!-- Overall Progress (now last) -->
+                                    <!-- Overall Progress -->
                                     <div class="progress-item">
                                         <div class="progress-header">
                                             <span>Overall Progress</span>
@@ -1728,6 +1743,43 @@
             }
         }
 
+        // Sorting function
+        function applySort() {
+            const sortValue = document.getElementById('sortFilter').value;
+            const grid = document.getElementById('showsGrid');
+            const wrappers = Array.from(document.querySelectorAll('.show-card-wrapper'));
+
+            // Sort the wrappers array
+            wrappers.sort((a, b) => {
+                const cardA = a.querySelector('.show-card');
+                const cardB = b.querySelector('.show-card');
+                if (!cardA || !cardB) return 0;
+
+                const getNum = (card, attr) => parseFloat(card.dataset[attr]) || 0;
+                const getTitle = (card) => card.dataset.title || '';
+
+                switch (sortValue) {
+                    case 'title':
+                        return getTitle(cardA).localeCompare(getTitle(cardB));
+                    case 'progress-desc':
+                        return getNum(cardB, 'progress') - getNum(cardA, 'progress');
+                    case 'progress-asc':
+                        return getNum(cardA, 'progress') - getNum(cardB, 'progress');
+                    case 'season-progress-desc':
+                        return getNum(cardB, 'seasonProgress') - getNum(cardA, 'seasonProgress');
+                    case 'season-progress-asc':
+                        return getNum(cardA, 'seasonProgress') - getNum(cardB, 'seasonProgress');
+                    case 'next-episode':
+                        return (parseInt(cardA.dataset.nextEpisode) || 9999999999) - (parseInt(cardB.dataset.nextEpisode) || 9999999999);
+                    default:
+                        return 0;
+                }
+            });
+
+            // Re-append sorted wrappers to the grid
+            wrappers.forEach(wrapper => grid.appendChild(wrapper));
+        }
+
         // Combined filter function (search + progress)
         function applyFilters() {
             const searchTerm = document.getElementById('titleSearch').value.toLowerCase();
@@ -1777,13 +1829,15 @@
                 wrapper.style.display = (matchesSearch && matchesProgress) ? 'block' : 'none';
             });
 
-            // After filtering, update the dropdown counts
+            // After filtering, update the dropdown counts and re-sort
             updateFilterCounts();
+            applySort();
         }
 
         // Attach event listeners
         document.getElementById('titleSearch').addEventListener('input', applyFilters);
         document.getElementById('progressFilter').addEventListener('change', applyFilters);
+        document.getElementById('sortFilter').addEventListener('change', applySort);
 
         document.getElementById('clearFilters').addEventListener('click', function() {
             document.getElementById('titleSearch').value = '';
@@ -1821,8 +1875,9 @@
 
             setupExpandButtons();
             setupMouseLeaveHandlers();
-            // Initial count update
+            // Initial count update and sort
             updateFilterCounts();
+            applySort();
         });
     </script>
 </body>
