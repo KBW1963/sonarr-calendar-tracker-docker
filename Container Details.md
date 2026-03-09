@@ -22,6 +22,7 @@ sonarr-calendar/
 ├── Dockerfile
 ├── docker-compose.yml
 ├── .dockerignore
+|── changelog.md
 └── README.md
 ```
 ---
@@ -145,6 +146,7 @@ View logs
 ```
 docker-compose logs -f
 ```
+
 
 
 
