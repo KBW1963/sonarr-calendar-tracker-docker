@@ -30,16 +30,21 @@ sonarr-calendar/
 Hopefully this keeps the image small by excluding unnecessary files.
 ```
 .git
-**pycache**
-_.pyc
-_.pyo
+__pycache__
+*.pyc
+*.pyo
 .pytest_cache
 .coverage
 htmlcov
 sonarr_images
 sonarr_calendar.html
 sonarr_calendar_data.json
-*.md
+.env
+# changelog.md
+changelog.md
+Docker Build Instrcutions.md
+docker-compose_TrueNAS.yml
+sonarr*.py
 
 ```
 ---
@@ -140,6 +145,7 @@ View logs
 ```
 docker-compose logs -f
 ```
+
 
 
 
