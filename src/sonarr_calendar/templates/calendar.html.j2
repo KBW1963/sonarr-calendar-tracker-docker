@@ -1151,6 +1151,16 @@
     </style>
 </head>
 <body class="theme-{{ config.html_theme }}">
+    <!-- Error message (if any) -->
+    {% if error_message %}
+    <div style="background-color: #ff4444; color: white; padding: 20px; margin: 20px; border-radius: 10px; text-align: center; border: 2px solid #cc0000;">
+        <i class="fas fa-exclamation-triangle" style="font-size: 2em; margin-bottom: 10px;"></i>
+        <h3>⚠️ An error occurred</h3>
+        <p>{{ error_message }}</p>
+        <p style="font-size: 0.9em; margin-top: 10px;">Some data may be missing or incomplete. Check the logs for details.</p>
+    </div>
+    {% endif %}
+
     <div class="container">
         <div class="header-top">
             <div class="filter-dropdown">
