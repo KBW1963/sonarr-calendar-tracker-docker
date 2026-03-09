@@ -11,36 +11,24 @@ Version numbers starting from 3.0.0 correspond to the Docker‑ready release.
 
 ### Added
 
-- **Current Season Progress Bar** – Each show card now displays a third progress bar for the current season, using the existing `current_season_progress` data. This provides a quick visual indicator of how far along the active season is, complementing the overall and date‑range progress bars.
-- **Progress Bar Colour Consistency** – The new bar uses the same `get_progress_bar_color` function as the other bars, ensuring colour‑coding matches the legend (green for 100%, red for 0%, etc.).
+- **Error Handling** – The application now gracefully handles Sonarr API failures and other exceptions:
+  - Errors are logged and an error message is displayed prominently in the generated HTML.
+  - Partial data is still shown where available (e.g., if series fetch succeeds but calendar fails, library stats will still display).
+  - A fallback error page is generated even on critical failures, ensuring the user always sees something.
 
 ### Changed
 
-- **Card Layout** – Added a new `.progress-item` block for current season, slightly increasing card height but improving at‑a‑glance information density.
-
-### Changed
-
-- **Card Layout** – Moved the genres block above the "Episodes in Date Range" section. This groups all show metadata (title, year, network, runtime, rating, genres) together, making the card layout more logical and improving readability.
-
-### Changed
-
-- **Library Heading Alignment** – Now left‑aligned to match the date range, improving visual consistency.
-- **Card Metadata Spacing** – Reduced padding between show meta and genres, creating a tighter, more compact card layout.
-- **Header Text** – Updated wording for summary cards to be more natural and descriptive (as per user request).
+- **Progress Filters** – Replaced overall progress filters with **current season progress** filters for better relevance. Dropdown options now:
+  - Season Complete (100%)
+  - High Season Progress (75‑99%)
+  - Medium Season Progress (25‑74%)
+  - Low Season Progress (<25%)
+- **Dynamic Filter Counts** – Added JavaScript to update the option counts based on visible shows, ensuring accuracy even after search or other filters are applied.
+- **Card Data** – Added `data-season-progress` attribute to each show card to support the new filters.
 
 ### Fixed
 
-- **Import Error** – Added missing `get_episode_status_class` to the import list in `html_generator.py` and ensured the function is defined in `utils.py`.
-
-### Changed
-
-- **Badge Styling** – Moved episode badge inline styles to dedicated CSS classes (`.badge-premiere`, `.badge-season-finale`, etc.). This improves maintainability and reduces inline style calculations.
-- **Dot Color** – The small status dot now reflects **date range progress** instead of overall progress, making it clear whether episodes in the current range are downloaded.
-- **Filter Dropdown Labels** – Clarified overall vs. date range progress filters and updated counts to match visible shows.
-
-### Fixed
-
-- **Filter Consistency** – All progress filters now correctly apply to the visible shows (those with episodes in the selected date range).
+- **Filter Logic** – Updated the switch statement to use `seasonProgress` for the new season‑based options.
 
 ### Changed
 
@@ -297,6 +285,3 @@ Version numbers starting from 3.0.0 correspond to the Docker‑ready release.
 - NameError in connection test (moved requests import inside class).
 
 _Note: This version is the last pre‑Docker release. Docker versions start at 3.0.0._
-
-
-
