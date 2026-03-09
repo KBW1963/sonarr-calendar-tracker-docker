@@ -7,7 +7,6 @@
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,{{ sonarr_icon_base64 }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* (all existing styles remain unchanged – same as previous version) */
         :root {
             --primary-color: #00b4db;
             --primary-dark: #0083b0;
@@ -225,7 +224,8 @@
             gap: 15px;
         }
 
-        /* Library heading (styled like the date box) */
+        /* Library heading – now left‑aligned */
+      /* Library heading (styled like the date box) */
         .library-heading {
             background: rgba(255,255,255,0.1);
             padding: 10px 20px;
@@ -549,6 +549,14 @@
             transform: translateY(-2px);
         }
 
+        /* Reduce spacing between show meta and genres */
+        .show-meta {
+            margin-bottom: 10px;  /* slightly reduced from 20px */
+        }
+        .show-meta + .genres {
+            margin-top: -10px;    /* pull genres up closer */
+        }
+
         .shows-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -699,7 +707,7 @@
         .show-meta {
             color: var(--primary-color);
             font-size: 0.9em;
-            margin-bottom: 20px;
+            margin-bottom: 10px;  /* reduced from 20px */
             min-height: 1.5em;
             white-space: nowrap;
             overflow: hidden;
@@ -951,7 +959,7 @@
             display: flex;
             flex-wrap: wrap;
             gap: 5px;
-            margin: 15px 0;
+            margin: 0 0 15px 0;  /* adjusted to reduce top spacing */
             min-width: 0;
         }
         .genre-tag {
@@ -1081,10 +1089,10 @@
             <i class="fas fa-arrow-up"></i>
         </a>
 
-          <header>
+        <header>
             <h1><i class="fas fa-tv"></i> Upcoming TV Shows</h1>
 
-            <!-- Library heading -->
+            <!-- Library heading (now left‑aligned) -->
             <div class="library-heading">
                 <i class="fas fa-book-open"></i> Your current library overview
             </div>
@@ -1109,7 +1117,7 @@
                         </p>
                     {% endif %}
                 </div>
-                <!-- Card 3: Continuing vs Ended vs Upcoming -->
+                <!-- Card 3: Continuing vs Ended vs Upcoming (updated wording) -->
                 <div class="summary-card">
                     <p>
                         Out of <strong>{{ library_stats.total_series|default(0) }}</strong> shows in your library,
@@ -1117,7 +1125,7 @@
                         <strong>{{ library_stats.ended_series|default(0) }}</strong> have ended.
                     </p>
                 </div>
-                <!-- Card 4: Future episodes -->
+                <!-- Card 4: Future episodes (updated wording) -->
                 <div class="summary-card">
                     <p>
                         Sonarr has <strong>{{ library_stats.future_episodes|default(0) }}</strong> future episodes scheduled.
@@ -1131,7 +1139,7 @@
                 ({{ date_range.total_days }} days total)
             </div>
 
-            <!-- Second row: range stats (only two cards) -->
+            <!-- Second row: range stats (only two cards, updated wording) -->
             <div class="summary-grid" style="margin-top: 10px;">
                 <!-- Card 1: shows with episodes in range -->
                 <div class="summary-card">
@@ -1193,7 +1201,7 @@
                 </div>
                 <div class="stat-progress-stats">
                     {{ library_stats.total_downloaded_all }}/{{ library_stats.total_episodes_all }} episodes • 
-                    {{ library_stats.total_series }} shows
+                    {{ library_stats.total_series }} series
                 </div>
                 <!-- Footnote moved here -->
                 <div style="margin-top: 15px; font-size: 0.9em; opacity: 0.9; text-align: center; border-top: 1px solid var(--border-color); padding-top: 10px;">
@@ -1327,6 +1335,15 @@
                                     {{ ' • ' + show.runtime|string + ' min' if show.runtime else '' }}
                                     {{ ' • ⭐ ' + "%.1f"|format(show.rating) if show.rating > 0 else '' }}
                                 </div>
+
+                                <!-- Genres moved above episodes, now closer to meta -->
+                                {% if show.genres %}
+                                <div class="genres">
+                                    {% for genre in show.genres[:3] %}
+                                    <span class="genre-tag">{{ genre }}</span>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
 
                                 <div class="episodes-section">
                                     <div class="section-title">Episodes in Date Range</div>
@@ -1471,15 +1488,22 @@
                                             {{ show.date_range_downloaded }}/{{ show.date_range_episodes }} episodes in date range
                                         </div>
                                     </div>
-                                </div>
 
-                                {% if show.genres %}
-                                <div class="genres">
-                                    {% for genre in show.genres[:3] %}
-                                    <span class="genre-tag">{{ genre }}</span>
-                                    {% endfor %}
+                                    <!-- Current Season Progress -->
+                                    <div class="progress-item">
+                                        <div class="progress-header">
+                                            <span>Current Season (S{{ show.current_season }})</span>
+                                            <span class="progress-percentage">{{ "%.1f"|format(show.current_season_progress) }}%</span>
+                                        </div>
+                                        <div class="progress-bar">
+                                            <div class="progress-fill" style="width: {{ show.current_season_progress }}%; 
+                                                 background: {{ get_progress_bar_color(show.current_season_progress) }};"></div>
+                                        </div>
+                                        <div class="progress-stats">
+                                            {{ show.current_season_downloaded }}/{{ show.current_season_episodes }} episodes
+                                        </div>
+                                    </div>
                                 </div>
-                                {% endif %}
 
                                 <div class="show-footer">
                                     <div class="season-info">
