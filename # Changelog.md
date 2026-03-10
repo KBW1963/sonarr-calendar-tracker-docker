@@ -7,6 +7,16 @@ Version numbers starting from 3.0.0 correspond to the Docker‑ready release.
 
 ---
 
+## [3.5.0] - 2026-03-10
+
+### Changed
+
+- **Episode Display** – Removed grouping of multiple episodes airing on the same date. Each episode now appears individually in the preview list, allowing proper badges (e.g., premiere, finale) to be shown for every episode. The preview limit (2 episodes) and expand/collapse functionality still apply, keeping the card compact while providing more accurate episode information.
+
+### Fixed
+
+- **Badge Accuracy** – Previously, when multiple episodes aired on the same day, only the first episode's badge was shown. Now each episode retains its own badge, improving clarity for shows with season premieres and finales on the same date.
+
 ## [3.4.1] - 2026-03-10
 
 ### Fixed
