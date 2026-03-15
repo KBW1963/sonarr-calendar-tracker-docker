@@ -7,6 +7,25 @@ Version numbers starting from 3.0.0 correspond to the Docker‑ready release.
 
 ---
 
+## [3.7.0] - 2026-03-15
+
+### Added
+
+- **Public URL configuration** – New environment variable `SONARR_PUBLIC_URL` (defaults to `SONARR_URL` if not set). This allows you to specify a different base URL for user‑facing links (e.g., the public Sonarr domain) while keeping the internal IP for API calls and image downloads. External users clicking on show titles will now be directed to your public Sonarr instance, where they will be prompted to log in as expected.
+
+### Changed
+
+- **Image URL generation** – `get_cached_image_url` now always returns a relative path (e.g., `/images/123_poster.jpg`). This ensures images are served from your local nginx cache regardless of the environment, eliminating any dependency on the public Sonarr URL for image delivery.
+- **Logging cleanup** – Removed the verbose `logger.debug` line that printed "Cached ... already exists" for every series. This reduces log clutter while retaining useful info (downloads, warnings, errors).
+
+### Fixed
+
+- **External links** – Show cards and completed seasons links now correctly use the public URL when `SONARR_PUBLIC_URL` is provided, fixing a previous issue where they pointed to the internal IP.
+
+### Notes
+
+- If you have been running with `SONARR_URL` set to an internal IP and `SONARR_PUBLIC_URL` to your public domain, this update will make all user‑facing links use the public domain without affecting image downloads.
+
 ## [3.6.0] - 2026-03-15
 
 ### Added
@@ -28,8 +47,8 @@ Version numbers starting from 3.0.0 correspond to the Docker‑ready release.
 
 ### Performance
 
-- **`cli.py`** – Consolidated multiple loops over `all_series` into a single loop when logging series status, reducing redundant passes and improving startup speed for large libraries.
-- **`models.py`** - `calculate_progress`\*\* – Now iterates through seasons only once, reducing overhead.
+- **`models.py`** – `calculate_progress` now iterates through seasons only once, reducing overhead.
+- **`utils.py`** – `calculate_overall_statistics` now replaces multiple `sum` comprehensions with a single loop, cutting the number of passes over the shows list from ~8 to 1.
 - **`utils.py`**`calculate_overall_statistics`\*\* – Replaced multiple `sum` comprehensions with a single loop, cutting the number of passes over the shows list from ~8 to 1.
 
 - **`process_calendar_data`** – Simplified episode collection by removing unnecessary date grouping; episodes are now appended directly to a list and sorted once, improving efficiency for large calendars.
