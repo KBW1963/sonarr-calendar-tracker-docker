@@ -49,8 +49,6 @@ Version numbers starting from 3.0.0 correspond to the Docker‑ready release.
 
 - **`models.py`** – `calculate_progress` now iterates through seasons only once, reducing overhead.
 - **`utils.py`** – `calculate_overall_statistics` now replaces multiple `sum` comprehensions with a single loop, cutting the number of passes over the shows list from ~8 to 1.
-- **`utils.py`**`calculate_overall_statistics`\*\* – Replaced multiple `sum` comprehensions with a single loop, cutting the number of passes over the shows list from ~8 to 1.
-
 - **`process_calendar_data`** – Simplified episode collection by removing unnecessary date grouping; episodes are now appended directly to a list and sorted once, improving efficiency for large calendars.
 
 ### Changed
