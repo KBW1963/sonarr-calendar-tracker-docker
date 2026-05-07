@@ -58,7 +58,7 @@ I have tested the deployment via my own TrueNAS env which already has my ARR sta
 ## 🗃️ Prerequisites
 
 - A working Docker environment – either TrueNAS SCALE Apps, Portainer, Dockge, or a machine with Docker and docker‑compose installed.
-- Sonarr instance – you need its URL and API key (Settings → General in Sonarr).
+- Sonarr instance – you need its URL and API key ('Settings → General' in Sonarr).
 - Since the dashboard defaults to fanart, it would be useful to have fanart for your shows (see image caching above).
 - Basic knowledge of your container platform’s web UI (for TrueNAS users) or the command line (for docker‑compose users).
 - A place to store persistent data – directories on your host where the container will write the HTML file and cache images. These should be on a dataset (TrueNAS) or any folder with appropriate permissions.
